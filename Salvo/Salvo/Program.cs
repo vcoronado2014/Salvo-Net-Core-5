@@ -28,7 +28,7 @@ namespace Salvo
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "Ha ocurrido un error al enviar la info a la BD");
+                    logger.LogError(ex, "Ha ocurrido un error al enviar la info a la base de datos");
                 }
 
             }
