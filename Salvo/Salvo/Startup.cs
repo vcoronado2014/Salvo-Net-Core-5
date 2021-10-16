@@ -30,6 +30,7 @@ namespace Salvo
             services.AddRazorPages();
             services.AddDbContext<SalvoContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("SalvoDataBase")));
             services.AddScoped<IGameRepository, GameRepository>();
+            services.AddScoped<IGamePlayerRepository, GamePlayerRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
