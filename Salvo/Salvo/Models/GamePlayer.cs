@@ -15,6 +15,7 @@ namespace Salvo.Models
         public long GameId { get; set; }
         public Game Game { get; set; }
         public ICollection<Ship> Ships { get; set; }
+        public ICollection<Salvo> Salvos { get; set; }
 
     }
 }
