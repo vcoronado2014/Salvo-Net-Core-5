@@ -40,15 +40,17 @@ namespace Salvo.Controllers
                             {
                                 Id = gp.Player.Id,
                                 Email = gp.Player.Email
-                            }
+                            },
+                            Point = gp.GetScore() != null ? (double?)gp.GetScore().Point : null
                         }).ToList()
                     });
 
                 return Ok(games);
+
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ex.Message);
             }
         }
 
