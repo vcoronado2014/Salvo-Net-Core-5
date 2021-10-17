@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Salvo.Models;
 using Salvo.Repositories;
 using System;
@@ -12,6 +13,7 @@ namespace Salvo.Controllers
 {
     [Route("api/games")]
     [ApiController]
+    [Authorize]
     public class GamesController : ControllerBase
     {
         private IGameRepository _repository;
@@ -23,29 +25,35 @@ namespace Salvo.Controllers
 
         // GET: api/Games
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Get()
         {
             try
             {
-                var games = _repository.GetAllGamesWithPlayers()
-                    .Select(g => new GameDTO
-                    {
-                        Id = g.Id,
-                        CreationDate = g.CreationDate,
-                        GamePlayers = g.GamePlayers.Select(gp => new GamePlayerDTO
-                        {
-                            Id = gp.Id,
-                            JoinDate = gp.JoinDate,
-                            Player = new PlayerDTO
-                            {
-                                Id = gp.Player.Id,
-                                Email = gp.Player.Email
-                            },
-                            Point = gp.GetScore() != null ? (double?)gp.GetScore().Point : null
-                        }).ToList()
-                    });
+                GameListDTO gameList = new GameListDTO
+                {
+                    Email = User.FindFirst("Player") != null ? User.FindFirst("Player").Value : "Guest",
+                    Games = _repository.GetAllGamesWithPlayers()
+                                   .Select(g => new GameDTO
+                                   {
+                                       Id = g.Id,
+                                       CreationDate = g.CreationDate,
+                                       GamePlayers = g.GamePlayers.Select(gp => new GamePlayerDTO
+                                       {
+                                           Id = gp.Id,
+                                           JoinDate = gp.JoinDate,
+                                           Player = new PlayerDTO
+                                           {
+                                               Id = gp.Player.Id,
+                                               Email = gp.Player.Email
+                                           },
+                                           Point = gp.GetScore() != null ? (double?)gp.GetScore().Point : null
+                                       }).ToList()
+                                   }).ToList()
+                };
 
-                return Ok(games);
+                return Ok(gameList);
+
 
             }
             catch (Exception ex)
