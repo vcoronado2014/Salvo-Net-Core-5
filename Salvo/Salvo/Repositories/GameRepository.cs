@@ -29,6 +29,15 @@ namespace Salvo.Repositories
                 .OrderBy(game => game.CreationDate)
                 .ToList();
         }
+
+        public Game FindById(int id)
+        {
+            return FindByCondition(game => game.Id == id)
+                    .Include(game => game.GamePlayers)
+                      .ThenInclude(gp => gp.Player)
+                .FirstOrDefault();
+        }
+
     }
 
 }

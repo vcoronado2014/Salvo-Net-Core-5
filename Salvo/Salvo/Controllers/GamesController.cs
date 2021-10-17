@@ -101,6 +101,41 @@ namespace Salvo.Controllers
             }
 
         }
+        // POST: api/Games/{id}/Players
+        [HttpPost("{id}/players", Name = "Join")]
+        public IActionResult Join(int id)
+        {
+            try
+            {
+                string email = User.FindFirst("Player") != null ? User.FindFirst("Player").Value : "Guest";
+                Player player = _playerRepository.FindByEmail(email);
+
+                Game game = _repository.FindById(id);
+                if (game == null)
+                    return StatusCode(403, "No existe el juego");
+
+                if (game.GamePlayers.Where(gp => gp.Player.Id == player.Id).FirstOrDefault() != null)
+                    return StatusCode(403, "Ya se encuentra el jugador en el juego");
+
+                if (game.GamePlayers.Count > 1)
+                    return StatusCode(403, "Juego lleno");
+
+                GamePlayer gamePlayer = new GamePlayer
+                {
+                    GameId = game.Id,
+                    PlayerId = player.Id,
+                    JoinDate = DateTime.Now
+                };
+                _gamePlayerRepository.Save(gamePlayer);
+                return StatusCode(201, gamePlayer.Id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
 
         // PUT: api/Games/5
         [HttpPut("{id}")]
