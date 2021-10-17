@@ -17,10 +17,16 @@ namespace Salvo.Controllers
     public class GamesController : ControllerBase
     {
         private IGameRepository _repository;
+        private IPlayerRepository _playerRepository;
+        private IGamePlayerRepository _gamePlayerRepository;
 
-        public GamesController(IGameRepository repository)
+
+        public GamesController(IGameRepository repository, IPlayerRepository playerRepository, IGamePlayerRepository gamePlayerRepository)
         {
             _repository = repository;
+            _playerRepository = playerRepository;
+            _gamePlayerRepository = gamePlayerRepository;
+
         }
 
         // GET: api/Games
@@ -71,8 +77,29 @@ namespace Salvo.Controllers
 
         // POST: api/Games
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post()
         {
+            try
+            {
+                string email = User.FindFirst("Player") != null ? User.FindFirst("Player").Value : "Guest";
+                Player player = _playerRepository.FindByEmail(email);
+                GamePlayer gamePlayer = new GamePlayer
+                {
+                    Game = new Game
+                    {
+                        CreationDate = DateTime.Now
+                    },
+                    PlayerId = player.Id,
+                    JoinDate = DateTime.Now
+                };
+                _gamePlayerRepository.Save(gamePlayer);
+                return StatusCode(201, gamePlayer.Id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
         }
 
         // PUT: api/Games/5

@@ -15,6 +15,31 @@
         this.getGames();
     },
     methods: {
+        joinGame(gId) {
+            var gpId = null;
+            axios.post('/api/games/' + gId + '/players')
+                .then(response => {
+                    gpId = response.data;
+                    window.location.href = '/game.html?gp=' + gpId;
+                })
+                .catch(error => {
+                    alert("erro al unirse al juego");
+                });
+        },
+        createGame() {
+            var gpId = null;
+            axios.post('/api/games')
+                .then(response => {
+                    gpId = response.data;
+                    window.location.href = '/game.html?gp=' + gpId;
+                })
+                .catch(error => {
+                    alert("erro al obtener los datos");
+                });
+        },
+        returnGame(gpId) {
+            window.location.href = '/game.html?gp=' + gpId;
+        },
         getGames: function (){
             this.showLogin(false);
             axios.get('/api/games')
