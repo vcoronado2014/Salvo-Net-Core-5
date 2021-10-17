@@ -12,6 +12,12 @@ namespace Salvo.Repositories
             : base(repositoryContext)
         {
         }
+        public void Save(Player player)
+        {
+            Create(player);
+            SaveChanges();
+        }
+
 
         public Player FindByEmail(string email)
         {

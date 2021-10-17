@@ -53,6 +53,11 @@ namespace Salvo.Repositories
         {
             this.RepositoryContext.Set<T>().Remove(entity);
         }
+        public void SaveChanges()
+        {
+            this.RepositoryContext.SaveChanges();
+        }
+
     }
 
 }
