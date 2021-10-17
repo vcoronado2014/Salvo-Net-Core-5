@@ -17,10 +17,12 @@ namespace Salvo.Controllers
     public class GamePlayersController : ControllerBase
     {
         private IGamePlayerRepository _repository;
+        private IPlayerRepository _playerRepository;
 
-        public GamePlayersController(IGamePlayerRepository repository)
+        public GamePlayersController(IGamePlayerRepository repository, IPlayerRepository playerRepository)
         {
             _repository = repository;
+            _playerRepository = playerRepository;
         }
 
         // GET: api/GamePlayers
@@ -92,6 +94,48 @@ namespace Salvo.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        // GET: api/GamePlayers/{id}/ships
+        [HttpPost("{id}/ships")]
+        public IActionResult Post(int id, [FromBody] List<ShipDTO> ships)
+        {
+            try
+            {
+                string email = User.FindFirst("Player") != null ? User.FindFirst("Player").Value : "Guest";
+                Player player = _playerRepository.FindByEmail(email);
+
+                GamePlayer gamePlayer = _repository.FindById(id);
+
+                if (gamePlayer == null)
+                    return StatusCode(403, "No existe el juego");
+
+                if (gamePlayer.Player.Id != player.Id)
+                    return StatusCode(403, "El usuario no se encuentra en el juego");
+
+                if (gamePlayer.Ships.Count == 5)
+                    return StatusCode(403, "Ya se han posicionado los barcos");
+
+                gamePlayer.Ships = ships.Select(ship => new Ship
+                {
+                    GamePlayerId = gamePlayer.Id,
+                    Type = ship.Type,
+                    Locations = ship.Locations.Select(location => new ShipLocation
+                    {
+                        ShipId = ship.Id,
+                        Location = location.Location
+                    }).ToList()
+                }).ToList();
+
+                _repository.Save(gamePlayer);
+
+                return StatusCode(201);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
 
         // POST: api/GamePlayers
         [HttpPost]
