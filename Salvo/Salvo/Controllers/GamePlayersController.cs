@@ -82,7 +82,12 @@ namespace Salvo.Controllers
                             Id = salvoLocation.Id,
                             Location = salvoLocation.Location
                         }).ToList()
-                    })).ToList()
+                    })).ToList(),
+                    Hits = gp.getHits(),
+                    HitsOpponent = gp.getOpponent()?.getHits(),
+                    Sunks = gp.getSunks(),
+                    SunksOpponent = gp.getOpponent()?.getSunks()
+
                 };
 
                 return Ok(gameView);

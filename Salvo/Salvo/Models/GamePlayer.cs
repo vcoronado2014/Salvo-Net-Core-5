@@ -25,6 +25,27 @@ namespace Salvo.Models
             return Game.GamePlayers.FirstOrDefault(gp => gp.Id != Id);
         }
 
+        public ICollection<SalvoHitDTO> getHits()
+        {
+            return Salvos.Select(salvo => new SalvoHitDTO
+            {
+                Turn = salvo.Turn,
+                Hits = getOpponent()?.Ships.Select(ship => new ShipHitDTO
+                {
+                    Type = ship.Type,
+                    Hits = salvo.Locations.Where(salvoLocation => ship.Locations.Any(shipLocation => shipLocation.Location == salvoLocation.Location)).Select(salvoLocation => salvoLocation.Location).ToList()
+                }).ToList()
+            }).ToList();
+        }
+
+        public ICollection<string> getSunks()
+        {
+            int lastTurn = Salvos.Count;
+
+            List<string> salvoLocations = getOpponent()?.Salvos.Where(salvo => salvo.Turn <= lastTurn).SelectMany(salvo => salvo.Locations.Select(location => location.Location)).ToList();
+
+            return Ships?.Where(ship => ship.Locations.Select(shipLocation => shipLocation.Location).All(salvoLocation => salvoLocations != null ? salvoLocations.Any(shipLocation => shipLocation == salvoLocation) : false)).Select(ship => ship.Type).ToList();
+        }
 
 
     }
