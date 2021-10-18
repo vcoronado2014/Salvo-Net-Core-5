@@ -47,6 +47,45 @@ namespace Salvo.Models
             return Ships?.Where(ship => ship.Locations.Select(shipLocation => shipLocation.Location).All(salvoLocation => salvoLocations != null ? salvoLocations.Any(shipLocation => shipLocation == salvoLocation) : false)).Select(ship => ship.Type).ToList();
         }
 
+        public GameState getGameState()
+        {
+            GameState gameState = GameState.ENTER_SALVO;
+
+            if (Ships == null || Ships?.Count() == 0)
+            {
+                gameState = GameState.PLACE_SHIPS;
+            }
+            else if (getOpponent() == null)
+            {
+                if (Salvos != null && Salvos?.Count() > 0)
+                    gameState = GameState.WAIT;
+            }
+            else
+            {
+                GamePlayer opponent = getOpponent();
+                int turn = Salvos != null ? Salvos.Count() : 0;
+                int opponentTurn = opponent.Salvos != null ? opponent.Salvos.Count() : 0;
+
+                if (turn > opponentTurn)
+                    gameState = GameState.WAIT;
+                else if (turn == opponentTurn && turn != 0)
+                {
+                    int playerSunks = getSunks().Count();
+                    int opponenSunks = opponent.getSunks().Count();
+
+                    if (playerSunks == Ships.Count() && opponenSunks == opponent.Ships.Count())
+                        gameState = GameState.TIE;
+                    else if (playerSunks == Ships.Count())
+                        gameState = GameState.LOSS;
+                    else if (opponenSunks == opponent.Ships.Count())
+                        gameState = GameState.WIN;
+                }
+            }
+
+            return gameState;
+        }
+
+
 
     }
 }

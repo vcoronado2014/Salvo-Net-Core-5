@@ -143,4 +143,3 @@ C:\Users\vcoro\OneDrive\salvo5\Salvo-Net-Core-5\Salvo\Salvo\obj\Debug\net5.0\Sal
 C:\Users\vcoro\OneDrive\salvo5\Salvo-Net-Core-5\Salvo\Salvo\obj\Debug\net5.0\ref\Salvo.dll
 C:\Users\vcoro\OneDrive\salvo5\Salvo-Net-Core-5\Salvo\Salvo\obj\Debug\net5.0\Salvo.pdb
 C:\Users\vcoro\OneDrive\salvo5\Salvo-Net-Core-5\Salvo\Salvo\obj\Debug\net5.0\Salvo.genruntimeconfig.cache
-C:\Users\vcoro\OneDrive\salvo5\Salvo-Net-Core-5\Salvo\Salvo\obj\Debug\net5.0\Salvo.csproj.AssemblyReference.cache

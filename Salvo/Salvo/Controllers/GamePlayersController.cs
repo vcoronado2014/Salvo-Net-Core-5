@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Salvo.Models;
-using Salvo.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Salvo.Models;
+using Salvo.Repositories;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,11 +19,13 @@ namespace Salvo.Controllers
     {
         private IGamePlayerRepository _repository;
         private IPlayerRepository _playerRepository;
+        private IScoreRepository _scoreRepository;
 
-        public GamePlayersController(IGamePlayerRepository repository, IPlayerRepository playerRepository)
+        public GamePlayersController(IGamePlayerRepository repository, IPlayerRepository playerRepository, IScoreRepository scoreRepository)
         {
             _repository = repository;
             _playerRepository = playerRepository;
+            _scoreRepository = scoreRepository;
         }
 
         // GET: api/GamePlayers
@@ -86,12 +89,11 @@ namespace Salvo.Controllers
                     Hits = gp.getHits(),
                     HitsOpponent = gp.getOpponent()?.getHits(),
                     Sunks = gp.getSunks(),
-                    SunksOpponent = gp.getOpponent()?.getSunks()
-
+                    SunksOpponent = gp.getOpponent()?.getSunks(),
+                    GameState = Enum.GetName(typeof(GameState), gp.getGameState())
                 };
 
                 return Ok(gameView);
-
 
             }
             catch (Exception ex)
@@ -134,6 +136,7 @@ namespace Salvo.Controllers
                 _repository.Save(gamePlayer);
 
                 return StatusCode(201);
+
             }
             catch (Exception ex)
             {
@@ -158,6 +161,10 @@ namespace Salvo.Controllers
 
                 if (gamePlayer.Player.Id != player.Id)
                     return StatusCode(403, "El usuario no se encuentra en el juego");
+
+                GameState gameState = gamePlayer.getGameState();
+                if (gameState == GameState.LOSS || gameState == GameState.WIN || gameState == GameState.TIE)
+                    return StatusCode(403, "El juego ha terminado");
 
                 GamePlayer opponentGamePlayer = gamePlayer.getOpponent();
                 int playerTurn = 0;
@@ -184,11 +191,76 @@ namespace Salvo.Controllers
 
                 _repository.Save(gamePlayer);
 
+                /* luego de que se ha modificado el gamePlayer con la información del ultimo 
+                 * salvo se verifica si termino el juego para guardar los scores*/
+                gameState = gamePlayer.getGameState();
+                if (gameState == GameState.WIN)
+                {
+                    Score score = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = gamePlayer.PlayerId,
+                        Point = 1
+                    };
+                    _scoreRepository.Save(score);
+
+                    Score scoreOpponent = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = opponentGamePlayer.PlayerId,
+                        Point = 0
+                    };
+                    _scoreRepository.Save(scoreOpponent);
+                }
+                else if (gameState == GameState.LOSS)
+                {
+                    Score score = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = gamePlayer.PlayerId,
+                        Point = 0
+                    };
+                    _scoreRepository.Save(score);
+
+                    Score scoreOpponent = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = opponentGamePlayer.PlayerId,
+                        Point = 1
+                    };
+                    _scoreRepository.Save(scoreOpponent);
+                }
+                else if (gameState == GameState.TIE)
+                {
+                    Score score = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = gamePlayer.PlayerId,
+                        Point = 0.5
+                    };
+                    _scoreRepository.Save(score);
+
+                    Score scoreOpponent = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = opponentGamePlayer.PlayerId,
+                        Point = 0.5
+                    };
+                    _scoreRepository.Save(scoreOpponent);
+                }
+
                 return StatusCode(201);
+
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ex.Message);
             }
         }
 
