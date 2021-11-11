@@ -310,9 +310,7 @@ namespace Salvo.Models
                 GamePlayer gamePlayer8 = context.GamePlayers.Find(8L);
                 GamePlayer gamePlayer9 = context.GamePlayers.Find(9L);
                 GamePlayer gamePlayer10 = context.GamePlayers.Find(10L);
-                GamePlayer gamePlayer11 = context.GamePlayers.Find(11L);
-                GamePlayer gamePlayer12 = context.GamePlayers.Find(12L);
-                GamePlayer gamePlayer13 = context.GamePlayers.Find(13L);
+
 
                 var salvos = new Salvo[]
                 {
