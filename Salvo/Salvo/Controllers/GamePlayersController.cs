@@ -155,6 +155,23 @@ namespace Salvo.Controllers
                     return StatusCode(403, "El usuario no se encuentra en el juego");
 
                 GamePlayer opponentGamePlayer = gamePlayer.getOpponent();
+                //si es que hay oponente a quien disparar
+                if (gamePlayer.Game.GamePlayers.Count() != 2)
+                    return StatusCode(403, "NO HAY A QUIEN DISPARAR!!!!");
+
+                //if (opponentGamePlayer == null)
+                //    return StatusCode(403, "NO HAY A QUIEN DISPARAR!!!!");
+
+                //podriamos validar si el opopnentte ya posicionó los ships
+                //lo comentamos por mientras
+                //opponentGamePlayer = _repository.FindById(opponentGamePlayer.Id);
+                if (gamePlayer.Ships.Count() == 0)
+                    return StatusCode(403, "EL USUARIO LOGUEADO NO HA POSICIONADO LOS BARCOS");
+
+                if (opponentGamePlayer.Ships.Count() == 0)
+                    return StatusCode(403, "EL OPONENTE NO HA POSICIONADO LOS BARCOS");
+
+
                 int playerTurn = 0;
                 int opponentTurn = 0;
 
